@@ -1,0 +1,7 @@
+node_modules/
+.env
+attendance.json
+attendance_export.csv
+package-lock.json
+local_test.js
+test_image.jpg

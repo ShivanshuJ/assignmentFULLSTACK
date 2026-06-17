@@ -1,0 +1,65 @@
+<!-- This is the HTML file to use the web interface of attendance system --> 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QR Attendance System</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        #message { font-weight: bold; padding: 10px; margin-top: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2>IITK QR Attendance Dashboard</h2>
+    
+    <div class="box">
+        <h3>Scan ID Card Photo</h3>
+        <form id="uploadForm">
+            <input type="file" id="qrImage" accept="image/*" required>
+            <button type="submit">Submit Attendance</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <div class="box">
+        <h3>Live Statistics</h3>
+        <p>Total Registered Students Checked-In: <span id="totalCount">0</span></p>
+        <ul id="rollList"></ul>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        
+        async function updateStats() {
+            const res = await fetch('/stats');
+            const data = await res.json();
+            document.getElementById('totalCount').innerText = data.total;
+            document.getElementById('rollList').innerHTML = data.rollNumbers.map(r => `<li>${r}</li>`).join('');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('qrImage');
+            const formData = new FormData();
+            formData.append('qrImage', fileInput.files[0]);
+
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = "Processing...";
+            msgDiv.style.backgroundColor = "#eee";
+
+            const res = await fetch('/scan', { method: 'POST', body: formData });
+            const result = await res.json();
+
+            msgDiv.innerText = result.message;
+            msgDiv.style.backgroundColor = result.success ? "#d4edda" : "#f8d7da";
+            
+            updateStats();
+        });
+
+        // Load initial data
+        updateStats();
+    </script>
+</body>
+</html>
